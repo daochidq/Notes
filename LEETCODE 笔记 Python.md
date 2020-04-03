@@ -129,27 +129,62 @@ int BFS(Node root,Node target){
 
 #### DFS Template
 
+```java
 // returun true if there is a path from cur to target.
 
 boolean DFS(Node cur, Node target, Set<Node> visited){
 
-​	return true if cur is target;
-
-​	for(next :  each neighbor of cur){
-
-​		if  ( next is not in visited){
-
-​			add next to visited
-
-​			return true if DFS(next,target,visited) ==  true;
-
-​		}
-
-​	}
-
-​	return false;
+	return true if cur is target;
+	for(next :  each neighbor of cur){
+		if  ( next is not in visited){
+			add next to visited
+			return true if DFS(next,target,visited) ==  true;
+		}
+	}
+	return false;
 
 }
+```
+
+
+
+#### DFS运用递归遍历的套路
+
+前序、中序、后序遍只是在对节点访问的顺序有一点不同，其它都相同。
+
+① 前序
+
+```JAVA
+void dfs(TreeNode root) {
+    visit(root);
+    dfs(root.left);
+    dfs(root.right);
+}
+```
+
+② 中序
+
+```java
+void dfs(TreeNode root) {
+    dfs(root.left);
+    visit(root);
+    dfs(root.right);
+}
+```
+
+③ 后序
+
+```JAVA
+void dfs(TreeNode root) {
+    dfs(root.left);
+    dfs(root.right);
+    visit(root);
+}
+```
+
+
+
+![](https://leetcode.com/articles/Figures/145_transverse.png)
 
 ### 4. Hashtable 哈希表
 

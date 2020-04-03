@@ -1,4 +1,4 @@
-# LEETCODE 刷题日记
+LEETCODE 刷题日记
 
 目标：50天 200道题----------一天4道
 
@@ -17,8 +17,8 @@
 - [x] DAY 3
 - [x] DAY 4
 - [x] DAY 5
-- [ ] DAY 6
-- [ ] DAY 7
+- [x] DAY 6
+- [x] DAY 7
 - [ ] DAY 8
 - [ ] DAY 9
 - [ ] DAY 10
@@ -765,6 +765,374 @@ def minDepth(self, root: TreeNode) -> int:
 ```
 
 
+
+## DAY 6 4.2
+
+### 404. Sum of Left Leaves (Easy)统计左叶子节点的和✅
+
+```html
+ 		3
+   / \
+  9  20
+    /  \
+   15   7
+
+There are two left leaves in the binary tree, with values 9 and 15 respectively. Return 24.
+```
+
+使用递归的方法
+
+这道题需要注意的是必须是左边的叶子节点才行
+
+所以需要一个helper function来决定这个节点是不是叶子节点
+
+决定叶子节点的要素：没有左右子节点，节点有值
+
+在主方程中：如果一个节点的左节点是叶子节点的话 则返回这个节点左节点的值 + 原方程（这个节点的右节点）
+
+返回 原方程（左节点）+ 原方程（右节点）
+
+```python
+def sumOfLeftLeaves(self, root: TreeNode) -> int:
+  if not root:
+    return 0
+  def isleave(node):
+    if not node:
+      return False
+    elif not node.left and not node.right:
+      return True
+    return False
+  if isleave(root.left):
+    return root.left.val + self.sumOfLeftLeaves(root.right)
+  return self.sumOfLeftLeaves(root.left) + self.sumOfLeftLeaves(root.right)
+```
+
+
+
+### 687. Longest Univalue Path (Easy) 相同节点值的最大路径长度✅
+
+```html
+             1
+            / \
+           4   5
+          / \   \
+         4   4   5
+
+Output : 2
+```
+
+用递归的方法，这道题也不简单
+
+先新建一个全局变量ans来记录最长的路径 初始值为0
+
+新建helper function来判断每个节点之后有几条路径
+
+在helper function中：初始化两个路径的值都为0(pr,pl)，当节点为空时返回0 让l为左子节点递归后返回的值，让r为右子节点递归后返回的值。因为每个节点都得到下个左右子节点得到的值，当左子节点有值并且和当前节点的值相等时 pl = l+1，同理得到pr=r+1。当左右子节点都为叶子节点时，l和r的值其实都是0. 然后更新ans，取（原先的ans和pr+pl中较大的一个）。注意，因为我们可以有4-4-4这样的路径，所以选路径的时候pr，pl可以相加。返回 max(pr,pl)
+
+最后在原方程中从root跑一遍helper function
+
+返回ans
+
+```python
+def longestUnivaluePath(self, root: TreeNode) -> int:
+  self.ans = 0
+  def path(node):
+    pr = pl = 0
+    if not node:
+      return 0
+    l = path(node.left)
+    r = path(node.right)
+    if node.left and node.left.val == node.val:
+      pl = l + 1
+    if node.right and node.right.val == node.val:
+      pr = r + 1
+    self.ans = max(self.ans,pr+pl)
+    return max(pr,pl)
+  path(root)
+  return self.ans
+```
+
+
+
+### 337. House Robber III (Medium) 间隔历遍✅
+
+```html
+   	 3
+    / \
+   2   3
+    \   \
+     3   1
+Maximum amount of money the thief can rob = 3 + 3 + 1 = 7.
+```
+
+好难啊这道题
+
+第一次用递归的方法做了，结果时间复杂度过于大
+
+改用DP的方法（吧，也可能不是），用了一个list吧（也可以不用list应该）
+
+这道题主要是求这个小偷在不偷相邻的两个房子的情况下最多能偷到多少钱
+
+可以简化为在每一个节点都判断要不要偷这个节点，每个节点生成两个值[偷，不偷]来代表在两种情况下把现在这个节点当成根节点所能偷到的数目。
+
+当节点为空的时候 两个值都是0【0，0】
+
+新建helper function，在方程中递归的判断要不要偷这个节点 
+
+左子节点得到两个值，右子节点也得到两个值
+
+当前节点偷的值则为，当前节点的值+左不偷+右不偷
+
+当前节点不偷的值则为，左边值较大的选项+右边值较大的选项
+
+原方程返回历遍整棵树之后 数值较大的那个选项
+
+```python
+def rob(self, root: TreeNode) -> int:
+  def decision(node):
+    if not node:
+      return [0,0]
+    left = decision(node.left)
+    right = desicon(node.right)
+    robb = node.val + left[0] + right[0]
+    notrob = max(left[0],left[1]) + max(right[0],right[1])
+    return [robb,notrob]
+  return max(decision(node))
+```
+
+
+
+###671. Second Minimum Node In a Binary Tree (Easy) 找出二叉树中第二小的节点✅
+
+```html
+Input:
+   2
+  / \
+ 2   5
+    / \
+    5  7
+
+Output: 5
+```
+
+因为题目设置，根节点的值总是小于它的子节点的值
+
+可以用dfs的方法来做
+
+将根节点的值储存为最小值
+
+当节点为空时，返回-1
+
+新建方程dfs，在方程中：
+
+节点为空时，返回-1
+
+当当前节点的值大于最小值时：返回当前节点的值
+
+令l= 左子节点递归得到的值，r=右子节点递归的值
+
+当l，r都不为-1时 返回较小的那个，否则返回不是-1的那个
+
+原方程返回dfs(root)
+
+```python
+def findSecondMinimumValue(self, root: TreeNode) -> int:
+  if not root:
+    return -1
+  min_num = root.val
+  def dfs(node):
+    if not root:
+      return -1
+    if node.val > min_num:
+      return node.val
+    l = dfs(node.left)
+    r = dfs(node.right)
+    if l == -1:
+      return r
+    if r == -1:
+      return l
+    return min(l,r)
+  return dfs(root)
+    
+```
+
+
+
+## DAY 7 4.3
+
+### 637. Average of Levels in Binary Tree (Easy) 一棵树每层节点的平均数✅
+
+```html
+Input:
+    3
+   / \
+  9  20
+    /  \
+   15   7
+Output: [3, 14.5, 11]
+```
+
+这道题主要是一个层次遍历，运用BFS的方法来解决
+
+BFS 主要是需要用到一个queue来储存每一层的节点，然后用while loop在当queue不为空的情况下循环，套路都是类似的。
+
+当queue 不为空时，每次循环pop出一个值 然后将二叉树的子节点再放到queue里
+
+在每一次while循环时 嵌套一个for循环，循环长度就是当前queue的长度（这样能保证在for结束后上一层的节点已经被全部移除）。在每次for loop 里 都pop出一个节点，并且将该节点的子节点加到queue里
+
+⚠️每次pop的时候需要从头pop 因为这是一个先进先出的list
+
+当走到最底层的时候已经没有可以放到queue里的节点了 此时queue为空 跳出循环
+
+这道题还需要一组数字来记录每一层一共有多少子节点 以及子节点的总和
+
+```Python
+def averageOfLevels(self, root: TreeNode) -> List[float]:
+  if not root:
+    return []
+  queue = collections.deque()
+  queue.append(root)
+  ans = []
+  while queue:
+    sum = 0
+    count = 0
+    for i in range(len(queue)):
+      count += 1
+      cur = queue.popleft()
+      if cur:
+        sum += cur.val
+      if cur.left:
+        queue.append(cur.left)
+      if cur.right:
+        queue.append(cur.right)
+    ans.append(float(sum/count))
+  return ans
+```
+
+
+
+### 513.Find Bottom Left Tree Value (Medium) 得到左下角的节点✅
+
+```html
+Input:
+
+        1
+       / \
+      2   3
+     /   / \
+    4   5   6
+       /
+      7
+
+Output:
+7
+```
+
+这道题也是可以用一个层次遍历来做， 用的是先进先出的queue
+
+只要我们每次把node加到queue里的时候 把右边的节点先加进去，左边的节点后加进去就可以了
+
+⚠️这里说的是最左边的节点 并不一定要是左节点
+
+```python
+def findBottomLeftValue(self, root: TreeNode) -> int:
+  queue = collections.deque()
+  queue.append(root)
+  while queue:
+    cur = queue.popleft()
+    if cur.right:
+      queue.append(cur.right)
+    if cur.left:
+      queue.append(cur.left)
+  return cur.val
+```
+
+
+
+### 144. Binary Tree Preorder Traversal (Medium) 非递归实现二叉树的前序遍历✅
+
+这道题我用了递归（DFS)与非递归(BFS)的方法分别做了一下
+
+非递归的方法用的是一个先进后出的queue
+
+递归的方法是有套路的，记下来就好了, 具体套路我放在了LeetCode笔记里
+
+具体的顺序可以参考下一题的图
+
+```python
+def preorderTraversal(self, root: TreeNode) -> List[int]:
+  #非递归方法
+  if not root:
+    return []
+  stack = [root]
+  ans = []
+  while stack:
+    cur = stack.pop()
+    if cur:
+      ans.append(cur.val)
+    if cur.right:
+      stack.append(cur.right)
+    if cur.left:
+      stack.append(cur.left)
+  return ans
+
+def preorderTraversal(self, root: TreeNode) -> List[int]:
+  #递归的方法
+  if not root:
+    return []
+  ans =[]
+  def dfs(node):
+    if not node:
+      return
+    ans.append(node.val)
+    dfs(node.left)
+    dfd(node.right)
+  dfs(root)
+  return ans
+```
+
+
+
+### 145. Binary Tree Postorder Traversal (Hard) 非递归实现二叉树的后序遍历✅
+
+套路都是类似的
+
+![](https://leetcode.com/articles/Figures/145_transverse.png)
+
+```python
+def postorderTraversal(self, root: TreeNode) -> List[int]:
+  # 非递归的方法
+  if not root:
+    return []
+  stack = collections.deque()
+  stack.append(root)
+  ans = collections.deque()
+  while stack:
+    cur = stack.pop()
+    if cur:
+      ans.appendleft(cur.val)
+    if cur.left:
+      stack.append(cur.left)
+    if cur.right:
+      stack.append(cur.right)
+   return ans
+
+def postorderTraversal(self, root: TreeNode) -> List[int]:  
+  #递归的方法
+  if not root:
+    return []
+  ans = []
+  def dfs(node):
+    if not node:
+      return
+    dfs(node.left)
+    dfs(node.right)
+    ans.append(node.val)
+  dfs(root)
+  return ans
+    
+  
+```
 
 
 
